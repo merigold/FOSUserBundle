@@ -12,10 +12,11 @@
 namespace FOS\UserBundle\Doctrine;
 
 use Doctrine\Common\EventSubscriber;
-use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
 use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\ODM\MongoDB\DocumentManager;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Event\PreUpdateEventArgs;
 use FOS\UserBundle\Model\UserInterface;
 use FOS\UserBundle\Util\CanonicalFieldsUpdater;
 use FOS\UserBundle\Util\PasswordUpdaterInterface;
@@ -42,14 +43,16 @@ class UserListener implements EventSubscriber
      */
     public function getSubscribedEvents()
     {
-        return [
+        return array(
             'prePersist',
             'preUpdate',
-        ];
+        );
     }
 
     /**
      * Pre persist listener based on doctrine common.
+     *
+     * @param LifecycleEventArgs $args
      */
     public function prePersist(LifecycleEventArgs $args)
     {
@@ -58,11 +61,15 @@ class UserListener implements EventSubscriber
             $this->updateUserFields($object);
         }
     }
+    
+    
 
     /**
      * Pre update listener based on doctrine common.
+     *
+     * @param LifecycleEventArgs $args
      */
-    public function preUpdate(LifecycleEventArgs $args)
+    public function preUpdate(PreUpdateEventArgs   $args)
     {
         $object = $args->getObject();
         if ($object instanceof UserInterface) {
@@ -73,6 +80,8 @@ class UserListener implements EventSubscriber
 
     /**
      * Updates the user properties.
+     *
+     * @param UserInterface $user
      */
     private function updateUserFields(UserInterface $user)
     {
@@ -82,8 +91,11 @@ class UserListener implements EventSubscriber
 
     /**
      * Recomputes change set for Doctrine implementations not doing it automatically after the event.
+     *
+     * @param ObjectManager $om
+     * @param UserInterface $user
      */
-    private function recomputeChangeSet(ObjectManager $om, UserInterface $user)
+    private function recomputeChangeSet(EntityManagerInterface $om, UserInterface $user)
     {
         $meta = $om->getClassMetadata(get_class($user));
 
