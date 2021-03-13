@@ -20,6 +20,7 @@ use Doctrine\ORM\Event\PreUpdateEventArgs;
 use FOS\UserBundle\Model\UserInterface;
 use FOS\UserBundle\Util\CanonicalFieldsUpdater;
 use FOS\UserBundle\Util\PasswordUpdaterInterface;
+use Doctrine\ORM\Event\LifecycleEventArgs;
 
 /**
  * Doctrine listener updating the canonical username and password fields.
